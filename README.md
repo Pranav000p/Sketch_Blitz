@@ -29,9 +29,15 @@ client/
     components/CanvasBoard.jsx
 
 server/
+  app.js
+  config/
+  controllers/
+  classes/
   index.js
   db.js
   models/
+  routes/
+  services/
 ```
 
 ## How To Run Locally
@@ -123,8 +129,10 @@ Stores finished game data like:
 
 ### Backend
 
-- `index.js` stores live room state in memory for fast realtime updates
-- Socket events handle room creation, joining, drawing, guesses, and rounds
+- `index.js` only starts the server and connects everything together
+- `controllers/socketController.js` handles Socket.IO events
+- `services/gameService.js` handles game logic like turns, scoring, hints, and round flow
+- `classes/Room.js` and `classes/Player.js` keep the live room data simple
 - Mongoose models save only permanent data to MongoDB
 
 ### Why some data is in memory and some data is in MongoDB
