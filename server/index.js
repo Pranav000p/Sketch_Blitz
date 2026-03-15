@@ -4,9 +4,16 @@ const http = require("http");
 const { Server } = require("socket.io");
 const createApp = require("./app");
 const { connectToDatabase } = require("./db");
-const { PORT, CLIENT_ORIGIN } = require("./config/gameConfig");
+const { PORT } = require("./config/gameConfig");
 const { seedWordsIfNeeded } = require("./services/wordService");
 const registerGameSocketHandlers = require("./controllers/socketController");
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (origin.endsWith(".vercel.app")) return true;
+  if (origin === "https://sketch-blitz.vercel.app") return true;
+  return false;
+}
 
 async function startServer() {
   await connectToDatabase();
@@ -21,7 +28,13 @@ async function startServer() {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: CLIENT_ORIGIN,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       methods: ["GET", "POST"],
     },
   });

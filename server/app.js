@@ -2,15 +2,28 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const { CLIENT_ORIGIN } = require("./config/gameConfig");
 const healthRoutes = require("./routes/healthRoutes");
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (origin.endsWith(".vercel.app")) return true;
+  return false;
+}
 
 function createApp() {
   const app = express();
   const clientDistPath = path.join(__dirname, "../client/dist");
   const clientIndexPath = path.join(clientDistPath, "index.html");
 
-  app.use(cors({ origin: CLIENT_ORIGIN }));
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    }
+  }));
   app.use(express.json());
   app.use(healthRoutes);
 
